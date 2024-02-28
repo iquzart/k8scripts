@@ -1,0 +1,20 @@
+#!/bin/bash
+
+IP_REQUIREMENT=32
+
+# Define colors
+BLUE='\033[0;34m'  # Blue color
+RED='\033[0;31m'   # Red color
+GREEN='\033[0;32m' # Green color
+NC='\033[0m'       # No color
+
+CLUSTER_NAME=$(kubectx -c)
+FREE_IPs_SVC=$((254 - $(kubectl get svc --all-namespaces -o json | jq -r '.items[] | select(.spec.clusterIP != null) | .metadata.name' | wc -l)))
+
+if [ $FREE_IPs_SVC -lt $IP_REQUIREMENT ]; then
+	FREE_IPs_SVC_COLOR=${RED}
+else
+	FREE_IPs_SVC_COLOR=${GREEN}
+fi
+
+echo -e "Number of Free SVC IPs in ${BLUE}${CLUSTER_NAME}${NC} are ${FREE_IPs_SVC_COLOR}${FREE_IPs_SVC}${NC}"
