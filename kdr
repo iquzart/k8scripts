@@ -1,0 +1,20 @@
+#!/bin/bash
+
+# Check if namespace argument is provided
+if [ -z "$1" ]; then
+	echo "Usage: $0 <namespace>"
+	exit 1
+fi
+
+namespace="$1"
+
+# Ask for confirmation before restarting all deployments
+read -p "Do you want to restart all deployments in namespace '$namespace'? (y/n): " choice
+if [ "$choice" == "y" ]; then
+	# Loop through deployments and perform rollout restart
+	for deployment in $(kubectl get deploy -n $namespace | awk '$1 != "NAME" { print $1 }'); do
+		kubectl rollout restart deployment -n $namespace $deployment
+	done
+else
+	echo "No deployments were restarted."
+fi
